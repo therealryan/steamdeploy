@@ -10,11 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * How many times have I written this?
+ * Convenient way to invoke command line functionality
  */
 class CommandLine {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CommandLine.class);
 
   public record Result(int status, List<String> stdOut) {
 
@@ -47,7 +51,7 @@ class CommandLine {
   }
 
   public Result run(String... cmd) {
-//    LOG.debug("Running {}", String.join(" ", cmd));
+    LOG.debug("Running {}", String.join(" ", cmd));
     try {
       ProcessBuilder builder = new ProcessBuilder(cmd)
           .redirectErrorStream(true);
@@ -65,11 +69,11 @@ class CommandLine {
 
       boolean normalExit = process.waitFor(timeout.getSeconds(), TimeUnit.SECONDS);
       if (!normalExit) {
-//        LOG.error("timeout breached!");
+        LOG.error("timeout breached!");
         process.destroyForcibly();
         return new Result(-1, lines);
       }
-//      LOG.debug("status {}", process.exitValue());
+      LOG.debug("status {}", process.exitValue());
       return new Result(process.exitValue(), lines);
     } catch (IOException ioe) {
       throw new UncheckedIOException(ioe);
@@ -84,12 +88,12 @@ class CommandLine {
       try (BufferedReader br = process.inputReader()) {
         String line;
         while ((line = br.readLine()) != null) {
-//          LOG.debug("\t{}", line);
+          LOG.debug("\t{}", line);
           lines.add(line);
           lastActivity.set(Instant.now());
         }
       } catch (IOException ioe) {
-//        LOG.error("Failed to stream command output", ioe);
+        LOG.error("Failed to stream command output", ioe);
       }
     });
     t.setDaemon(true);
@@ -104,11 +108,11 @@ class CommandLine {
           Thread.sleep(1000);
           Duration sinceLastActivity = Duration.between(lastActivity.get(), Instant.now());
           if (inactivity.getSeconds() < sinceLastActivity.getSeconds()) {
-//            LOG.error("Killing process due to {} of inactivity", sinceLastActivity);
+            LOG.error("Killing process due to {} of inactivity", sinceLastActivity);
             process.destroyForcibly();
           }
         } catch (InterruptedException ie) {
-//          LOG.warn("unexpected", ie);
+          LOG.warn("unexpected", ie);
         }
       }
     });

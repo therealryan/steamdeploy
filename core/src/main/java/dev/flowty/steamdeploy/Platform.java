@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -32,35 +33,33 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 enum Platform {
 
   LINUX("https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz",
-    Platform::extractTarGz,
-    Paths.get("steamcmd.sh")) {
+      Paths.get("steamcmd.sh")) {
     @Override
     public void prepCMD(Path cmdDir) {
       CommandLine.here().run("chmod", "+x",
-        cmdDir.resolve(steamCmd)
-          .toAbsolutePath().toString());
+          cmdDir.resolve(steamCmd)
+              .toAbsolutePath().toString());
       CommandLine.here().run("chmod", "+x",
-        cmdDir.resolve("linux32", "steamcmd")
-          .toAbsolutePath().toString());
+          cmdDir.resolve("linux32", "steamcmd")
+              .toAbsolutePath().toString());
     }
 
     @Override
     public Path steamHome(Path installation) {
       return Paths.get(System.getProperty("user.home"))
-        .resolve(".steam", "steam");
+          .resolve(".steam", "steam");
     }
   },
 
   MAC("https://steamcdn-a.akamaihd.net/client/installer/steamcmd_osx.tar.gz",
-    Platform::extractTarGz,
-    Paths.get("steamcmd")) {
+      Paths.get("steamcmd")) {
     @Override
     public void prepCMD(Path cmdDir) {
       CommandLine.here()
-        .run("chmod", "+x",
-          cmdDir.resolve(steamCmd).toAbsolutePath().toString());
+          .run("chmod", "+x",
+              cmdDir.resolve(steamCmd).toAbsolutePath().toString());
       CommandLine.in(cmdDir)
-        .run("bash", "steamcmd.sh", "+quit");
+          .run("bash", "steamcmd.sh", "+quit");
     }
 
     @Override
@@ -70,8 +69,7 @@ enum Platform {
   },
 
   WINDOWS("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip",
-    Platform::extractZip,
-    Paths.get("steamcmd.exe")) {
+      Paths.get("steamcmd.exe")) {
     @Override
     public Path steamHome(Path installation) {
       return installation;
@@ -84,8 +82,8 @@ enum Platform {
       // let's get that out of the way here where we don't care about the
       // exit status.
       CommandLine.here().run(
-        cmdDir.resolve(steamCmd).toAbsolutePath().toString(),
-        "+quit");
+          cmdDir.resolve(steamCmd).toAbsolutePath().toString(),
+          "+quit");
     }
   };
 
@@ -94,19 +92,18 @@ enum Platform {
   public final Path steamCmd;
 
   Platform(String source,
-           BiConsumer<URL, Path> extractor,
-           Path steamCmd) {
+      Path steamCmd) {
     try {
       this.source = new URI(source).toURL();
     } catch (URISyntaxException | MalformedURLException e) {
       throw new IllegalArgumentException(e);
     }
-    this.extractor = extractor;
+    this.extractor = extractorFor(source);
     this.steamCmd = steamCmd;
   }
 
-  public void installTo(Path destination) {
-    extractor.accept(source, destination);
+  public void installTo(Optional<URL> source, Path destination) {
+    extractor.accept(source.orElse(this.source), destination);
   }
 
   /**
@@ -129,9 +126,18 @@ enum Platform {
     throw new IllegalStateException("Failed to detect platform from os.name '" + osName + "'");
   }
 
+  private static BiConsumer<URL, Path> extractorFor(String source) {
+    if (source.endsWith(".zip")) {
+      return Platform::extractZip;
+    } else if (source.endsWith(".tar.gz")) {
+      return Platform::extractTarGz;
+    }
+    throw new IllegalStateException("Failed to determine extractor for " + source);
+  }
+
   private static void extractZip(URL zip, Path destination) {
     try (InputStream in = zip.openStream();
-         ZipInputStream zin = new ZipInputStream(in);) {
+        ZipInputStream zin = new ZipInputStream(in)) {
       String canonDestination = destination.toFile().getCanonicalPath() + File.separator;
       ZipEntry ze;
       while ((ze = zin.getNextEntry()) != null) {
@@ -155,8 +161,8 @@ enum Platform {
 
   private static void extractTarGz(URL targz, Path destination) {
     try (InputStream in = targz.openStream();
-         GzipCompressorInputStream gz = new GzipCompressorInputStream(in);
-         TarArchiveInputStream tar = new TarArchiveInputStream(gz)) {
+        GzipCompressorInputStream gz = new GzipCompressorInputStream(in);
+        TarArchiveInputStream tar = new TarArchiveInputStream(gz)) {
       String canonDestination = destination.toFile().getCanonicalPath() + File.separator;
       TarArchiveEntry tae;
       while ((tae = tar.getNextEntry()) != null) {
