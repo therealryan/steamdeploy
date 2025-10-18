@@ -47,10 +47,8 @@ class SteamCMDTest {
 
   /**
    * Shows that we can login and immediately quit
-   *
-   * @param expected expected stdout content
    */
-  private static void testLogin(String expected) {
+  private static void testLogin() {
     Path install = Paths.get("target", "SteamCMDTest", "installation");
     QuietFiles.recursiveDelete(install);
 
