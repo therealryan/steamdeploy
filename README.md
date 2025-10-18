@@ -12,7 +12,7 @@ Build plugin for deployment to steamworks
 
 At some point the cached credentials will need to be refreshed.
 
-In an instance of the sdk, run `steamcmd` and log in, e.g.:
+Using an instance of [the SteamCMD executable](https://developer.valvesoftware.com/wiki/SteamCMD), run `steamcmd` and log in, e.g.:
 
 ```
 $ steamcmd +login <your username> <your passwor> +quit
@@ -22,8 +22,8 @@ $ steamcmd +login <your username> <your passwor> +quit
 <summary>output</summary>
 
 ```
-Redirecting stderr to 'C:\Users\This PC\bin\sdk\tools\ContentBuilder\builder\logs\stderr.txt'
-Logging directory: 'C:\Users\This PC\bin\sdk\tools\ContentBuilder\builder/logs'
+Redirecting stderr to 'C:\Users\This PC\Documents\steamcmd\logs\stderr.txt'
+Logging directory: 'C:\Users\This PC\Documents\steamcmd/logs'
 [  0%] Checking for available updates...
 [----] Verifying installation...
 Steam Console Client (c) Valve Corporation - version 1757650979
@@ -54,8 +54,8 @@ $ steamcmd +login <your username> +quit
 <summary>output</summary>
 
 ```
-Redirecting stderr to 'C:\Users\This PC\bin\sdk\tools\ContentBuilder\builder\logs\stderr.txt'
-Logging directory: 'C:\Users\This PC\bin\sdk\tools\ContentBuilder\builder/logs'
+Redirecting stderr to 'C:\Users\This PC\Documents\steamcmd\logs\stderr.txt'
+Logging directory: 'C:\Users\This PC\Documents\steamcmd/logs'
 [  0%] Checking for available updates...
 [----] Verifying installation...
 Steam Console Client (c) Valve Corporation - version 1757650979
@@ -72,7 +72,9 @@ Unloading Steam API...OK
 
 Capture the config that contains the credentials:
 ```
-cat tools/ContentBuilder/builder/config/config.vdf | base64 > cfgb64.txt
+cat config/config.vdf | base64 > cfgb64.txt
 ```
+Note that the exact location of the `config.vdf` file that contains the authentication details is platform-specific.
+Check out the [`Platform` enum](core/src/main/java/dev/flowty/steamdeploy/Platform.java) in this project for details.
 
 Update the github secret with the contents of `cfgb64.txt`
