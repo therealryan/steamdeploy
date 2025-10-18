@@ -7,6 +7,17 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <name>steamdeploy</name>
+  <description>Build tooling for uploading to steamworks</description>
+  <url>https://github.com/therealryan/steamdeploy</url>
+
+  <developers>
+    <developer>
+      <name>Ryan McNally</name>
+      <email>therealryan@gmail.com</email>
+    </developer>
+  </developers>
+
   <modules>
     <module>core</module>
     <module>steamdeploy-maven-plugin</module>
