@@ -9,6 +9,9 @@
 
   <artifactId>core</artifactId>
 
+  <name>name</name>
+  <description>API for interaction with steamCMD</description>
+
   <dependencies>
 
     <dependency>

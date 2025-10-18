@@ -10,6 +10,9 @@
   <artifactId>steamdeploy-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
 
+  <name>steamdeploy-maven-plugin</name>
+  <description>Build tooling for uploading to steamworks</description>
+
   <properties>
     <maven-plugin-tools.version>3.15.1</maven-plugin-tools.version>
   </properties>
