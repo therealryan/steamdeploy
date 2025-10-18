@@ -1,17 +1,17 @@
 package dev.flowty.steamdeploy;
 
 import dev.flowty.steamdeploy.CommandLine.Result;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Exercises {@link SteamCMD}
@@ -30,34 +30,37 @@ class SteamCMDTest {
   @EnabledOnOs(OS.LINUX)
   @Test
   void linux() {
-    testLogin();
+    testLogin("Logging in user .* to Steam Public\\.\\.\\.0mOK");
   }
 
   @EnabledOnOs(OS.WINDOWS)
   @Test
   void windows() {
-    testLogin();
+    testLogin("Logging in user .* to Steam Public\\.\\.\\.OK");
   }
 
   @EnabledOnOs(OS.MAC)
   @Test
   void mac() {
-    testLogin();
+    testLogin("Logging in user .* to Steam Public\\.\\.\\.OK");
   }
 
   /**
    * Shows that we can login and immediately quit
    */
-  private static void testLogin() {
+  private static void testLogin(String pattern) {
     Path install = Paths.get("target", "SteamCMDTest", "installation");
     QuietFiles.recursiveDelete(install);
 
     Result result = new SteamCMD(install)
-      .loginAndQuit(new Auth(USERNAME, InjectableFile.ofB64(AUTH_VDF_B64)));
+        .loginAndQuit(new Auth(USERNAME, InjectableFile.ofB64(AUTH_VDF_B64)));
 
     Assertions.assertEquals(0, result.status());
-    Matcher loginMatcher = Pattern.compile("Logging in user .* to Steam Public...OK")
-      .matcher(String.join("\n", result.stdOut()));
-    Assertions.assertTrue(loginMatcher.find(), "failed to find successful login");
+    String stdout = result.stdOut().stream()
+        // strip non-printing characters
+        .map(line -> line.replaceAll("[^a-zA-Z0-9. ]", ""))
+        .collect(Collectors.joining("\n"));
+    Matcher loginMatcher = Pattern.compile(pattern).matcher(stdout);
+    Assertions.assertTrue(loginMatcher.find(), "failed to find successful login in\n" + stdout);
   }
 }
