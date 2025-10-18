@@ -28,6 +28,7 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
     - name: Set version
+      if: ${{ github.event.release.tag_name }}
       run: mvn versions:set -DnewVersion=${{ github.event.release.tag_name }}
 
     - name: Publish package
