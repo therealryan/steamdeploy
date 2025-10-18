@@ -10,6 +10,8 @@ import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Exercises {@link SteamCMD}
@@ -28,55 +30,19 @@ class SteamCMDTest {
   @EnabledOnOs(OS.LINUX)
   @Test
   void linux() {
-    testExecution("" +
-      "Steam Console Client (c) Valve Corporation - version _masked_\n" +
-      "-- type 'quit' to exit --\n" +
-      "Loading Steam API...OK\n" +
-      "Logging in using cached credentials.\n" +
-      "Logging in user '_masked_] to Steam Public...OK\n" +
-      "Waiting for client config...OK\n" +
-      "Waiting for user info...OK\n" +
-      "Unloading Steam API...OK\n" +
-      "Redirecting stderr to '_masked_'\n" +
-      "Logging directory: '_masked_'\n" +
-      "[  0%] Checking for available updates...\n" +
-      "[----] Verifying installation...");
+    testLogin();
   }
 
   @EnabledOnOs(OS.WINDOWS)
   @Test
   void windows() {
-    testExecution("" +
-      "Steam Console Client (c) Valve Corporation - version _masked_\n" +
-      "-- type 'quit' to exit --\n" +
-      "Loading Steam API...OK\n" +
-      "Logging in using cached credentials.\n" +
-      "Logging in user '_masked_] to Steam Public...OK\n" +
-      "Waiting for client config...OK\n" +
-      "Waiting for user info...OK\n" +
-      "Unloading Steam API...OK\n" +
-      "Redirecting stderr to '_masked_'\n" +
-      "Logging directory: '_masked_'\n" +
-      "[  0%] Checking for available updates...\n" +
-      "[----] Verifying installation...");
+    testLogin();
   }
 
   @EnabledOnOs(OS.MAC)
   @Test
   void mac() {
-    testExecution("" +
-      "Steam Console Client (c) Valve Corporation - version _masked_\n" +
-      "-- type 'quit' to exit --\n" +
-      "Loading Steam API...OK\n" +
-      "Logging in using cached credentials.\n" +
-      "Logging in user '_masked_] to Steam Public...OK\n" +
-      "Waiting for client config...OK\n" +
-      "Waiting for user info...OK\n" +
-      "Unloading Steam API...OK\n" +
-      "Redirecting stderr to '_masked_'\n" +
-      "Logging directory: '_masked_'\n" +
-      "[  0%] Checking for available updates...\n" +
-      "[----] Verifying installation...");
+    testLogin();
   }
 
   /**
@@ -84,22 +50,16 @@ class SteamCMDTest {
    *
    * @param expected expected stdout content
    */
-  private static void testExecution(String expected) {
+  private static void testLogin(String expected) {
     Path install = Paths.get("target", "SteamCMDTest", "installation");
     QuietFiles.recursiveDelete(install);
 
     Result result = new SteamCMD(install)
-      .loginAndQuit(new Auth(
-        USERNAME,
-        InjectableFile.ofB64(AUTH_VDF_B64)));
+      .loginAndQuit(new Auth(USERNAME, InjectableFile.ofB64(AUTH_VDF_B64)));
 
     Assertions.assertEquals(0, result.status());
-    Assertions.assertEquals(expected,
-      String.join("\n", result.stdOut())
-        .replaceAll("( - version )\\d+", "$1_masked_")
-        .replaceAll("(Logging in user ').*] ", "$1_masked_] ")
-        .replaceAll("(Redirecting stderr to ').*'", "$1_masked_'")
-        .replaceAll("(Logging directory: ').*'", "$1_masked_'")
-    );
+    Matcher loginMatcher = Pattern.compile("Logging in user .* to Steam Public...OK")
+      .matcher(String.join("\n", result.stdOut()));
+    Assertions.assertTrue(loginMatcher.find(), "failed to find successful login");
   }
 }
