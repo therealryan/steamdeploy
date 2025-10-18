@@ -1,0 +1,27 @@
+name: Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 22
+      uses: actions/setup-java@v4
+      with:
+        java-version: '22'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      env:
+        STEAM_USER_NAME: ${{ secrets.STEAM_USER_NAME }}
+        STEAM_AUTH_VDF: ${{ secrets.STEAM_AUTH_VDF }}
+      run: mvn -B test
