@@ -11,8 +11,6 @@ import org.junit.jupiter.api.condition.OS;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 /**
  * Exercises {@link SteamCMD}
  */
@@ -30,33 +28,78 @@ class SteamCMDTest {
   @EnabledOnOs(OS.LINUX)
   @Test
   void linux() {
-    testBuild("");
+    testExecution("" +
+      "Steam Console Client (c) Valve Corporation - version _masked_\n" +
+      "-- type 'quit' to exit --\n" +
+      "Loading Steam API...OK\n" +
+      "Logging in using cached credentials.\n" +
+      "Logging in user '_masked_] to Steam Public...OK\n" +
+      "Waiting for client config...OK\n" +
+      "Waiting for user info...OK\n" +
+      "Unloading Steam API...OK\n" +
+      "Redirecting stderr to '_masked_'\n" +
+      "Logging directory: '_masked_'\n" +
+      "[  0%] Checking for available updates...\n" +
+      "[----] Verifying installation...");
   }
 
   @EnabledOnOs(OS.WINDOWS)
   @Test
   void windows() {
-    testBuild("");
+    testExecution("" +
+      "Steam Console Client (c) Valve Corporation - version _masked_\n" +
+      "-- type 'quit' to exit --\n" +
+      "Loading Steam API...OK\n" +
+      "Logging in using cached credentials.\n" +
+      "Logging in user '_masked_] to Steam Public...OK\n" +
+      "Waiting for client config...OK\n" +
+      "Waiting for user info...OK\n" +
+      "Unloading Steam API...OK\n" +
+      "Redirecting stderr to '_masked_'\n" +
+      "Logging directory: '_masked_'\n" +
+      "[  0%] Checking for available updates...\n" +
+      "[----] Verifying installation...");
   }
 
-  private static void testBuild(String expected) {
-    Path appDir = Paths.get("target", "SteamCMDTest", "application");
-    QuietFiles.recursiveDelete(appDir);
-    QuietFiles.createDirectories(appDir);
-    QuietFiles.write(appDir.resolve("file.txt"), "game content".getBytes(UTF_8));
+  @EnabledOnOs(OS.MAC)
+  @Test
+  void mac() {
+    testExecution("" +
+      "Steam Console Client (c) Valve Corporation - version _masked_\n" +
+      "-- type 'quit' to exit --\n" +
+      "Loading Steam API...OK\n" +
+      "Logging in using cached credentials.\n" +
+      "Logging in user '_masked_] to Steam Public...OK\n" +
+      "Waiting for client config...OK\n" +
+      "Waiting for user info...OK\n" +
+      "Unloading Steam API...OK\n" +
+      "Redirecting stderr to '_masked_'\n" +
+      "Logging directory: '_masked_'\n" +
+      "[  0%] Checking for available updates...\n" +
+      "[----] Verifying installation...");
+  }
 
+  /**
+   * Shows that we can login and immediately quit
+   *
+   * @param expected expected stdout content
+   */
+  private static void testExecution(String expected) {
     Path install = Paths.get("target", "SteamCMDTest", "installation");
     QuietFiles.recursiveDelete(install);
 
-    Auth auth = new Auth(USERNAME, InjectableFile.ofB64(AUTH_VDF_B64));
-    InjectableFile appBuild = InjectableFile.appBuild(
-      123, "description", false, true, 456);
     Result result = new SteamCMD(install)
-      .deploy(auth,
-        appDir,
-        appBuild);
+      .loginAndQuit(new Auth(
+        USERNAME,
+        InjectableFile.ofB64(AUTH_VDF_B64)));
 
     Assertions.assertEquals(0, result.status());
-    Assertions.assertEquals(expected, result.stdOut());
+    Assertions.assertEquals(expected,
+      String.join("\n", result.stdOut())
+        .replaceAll("( - version )\\d+", "$1_masked_")
+        .replaceAll("(Logging in user ').*] ", "$1_masked_] ")
+        .replaceAll("(Redirecting stderr to ').*'", "$1_masked_'")
+        .replaceAll("(Logging directory: ').*'", "$1_masked_'")
+    );
   }
 }

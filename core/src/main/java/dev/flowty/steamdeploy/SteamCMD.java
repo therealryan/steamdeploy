@@ -1,6 +1,9 @@
 package dev.flowty.steamdeploy;
 
 import dev.flowty.steamdeploy.CommandLine.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,8 +12,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Handles creation of and interactions with an installation of <a
@@ -59,6 +60,29 @@ public class SteamCMD {
     return this;
   }
 
+  public Result loginAndQuit(Auth auth) {
+    auth.vdf().ifPresent(vdf -> {
+      Path destination = platform.steamHome(directory).resolve("config", "config.vdf");
+      LOG.info("INJECTING AUTH VDF TO {}", destination);
+      vdf.writeTo(destination);
+    });
+    LOG.info("Logging in");
+    Path full = directory.resolve(platform.steamCmd);
+    if (!Files.exists(full)) {
+      throw new IllegalStateException(full.toString());
+    }
+    return CommandLine.here()
+      .failingAfter(timeouts.total())
+      .toleratingInactivityOf(timeouts.inactivity())
+      .run(Stream.of(
+          full.toAbsolutePath().toString(),
+          "+login", auth.username(), auth.password().orElse(null),
+          "+quit")
+        .filter(Objects::nonNull)
+        .toArray(String[]::new)
+      );
+  }
+
   /**
    * Runs an app deployment
    *
@@ -105,35 +129,35 @@ public class SteamCMD {
   private Result build(Auth auth, Path script) {
     auth.vdf().ifPresent(vdf -> {
       Path destination = platform.steamHome(directory).resolve("config", "config.vdf");
-    LOG.info("INJECTING AUTH VDF TO {}", destination);
+      LOG.info("INJECTING AUTH VDF TO {}", destination);
       vdf.writeTo(destination);
     });
 
-        LOG.info("Building app");
+    LOG.info("Building app");
     Path full = directory.resolve(platform.steamCmd);
     if (!Files.exists(full)) {
       throw new IllegalStateException(full.toString());
     }
     Result result = CommandLine.here()
-        .failingAfter(timeouts.total())
-        .toleratingInactivityOf(timeouts.inactivity())
-        .run(Stream.of(
-                full.toAbsolutePath().toString(),
-                "+login", auth.username(), auth.password().orElse(null),
-                "+run_app_build",
-                script.toAbsolutePath().toString(),
-                "+quit")
-            .filter(Objects::nonNull)
-            .toArray(String[]::new)
-        );
+      .failingAfter(timeouts.total())
+      .toleratingInactivityOf(timeouts.inactivity())
+      .run(Stream.of(
+          full.toAbsolutePath().toString(),
+          "+login", auth.username(), auth.password().orElse(null),
+          "+run_app_build",
+          script.toAbsolutePath().toString(),
+          "+quit")
+        .filter(Objects::nonNull)
+        .toArray(String[]::new)
+      );
 
     if (result.status() == 0) {
       LOG.error("Build success!\n  {}",
-          String.join("\n  ", result.stdOut()));
+        String.join("\n  ", result.stdOut()));
     } else {
       LOG.error("Build failure! {}\n  {}",
-          result.status(),
-          String.join("\n  ", result.stdOut()));
+        result.status(),
+        String.join("\n  ", result.stdOut()));
       throw new IllegalStateException("build failed with status " + result.status());
     }
     return result;
