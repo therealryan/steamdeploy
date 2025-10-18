@@ -42,6 +42,8 @@ enum Platform {
       CommandLine.here().run("chmod", "+x",
           cmdDir.resolve("linux32", "steamcmd")
               .toAbsolutePath().toString());
+      CommandLine.here()
+        .run(steamCmd.toString(), "+quit");
     }
 
     @Override
