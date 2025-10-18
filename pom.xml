@@ -9,6 +9,7 @@
 
   <modules>
     <module>core</module>
+    <module>steamdeploy-maven-plugin</module>
   </modules>
 
   <scm>

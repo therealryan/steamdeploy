@@ -1,13 +1,13 @@
 package dev.flowty.steamdeploy;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Optional;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * File content that can be injected into a file structure
@@ -55,10 +55,10 @@ public interface InjectableFile {
    */
   static InjectableFile ofB64(String base64content) {
     return of(Optional.of(base64content)
-      .map(lines -> lines.replaceAll("\n", ""))
-      .map(b64 -> Base64.getDecoder().decode(b64))
-      .map(bytes -> new String(bytes, UTF_8))
-      .orElseThrow());
+        .map(lines -> lines.replaceAll("\n", ""))
+        .map(b64 -> Base64.getDecoder().decode(b64))
+        .map(bytes -> new String(bytes, UTF_8))
+        .orElseThrow());
   }
 
   /**
@@ -71,31 +71,31 @@ public interface InjectableFile {
    * @param depotId     The depot ID to upload to
    * @return <code>AppBuild</code> VDF content
    */
-  static InjectableFile appBuild(int appId, String description, boolean verbose, boolean preview,
-                                 int depotId) {
+  static InjectableFile appBuild(
+      int appId, String description, boolean verbose, boolean preview, int depotId) {
     return of(new VDF("AppBuild")
-      .v("AppId", String.valueOf(appId))
-      .v("Desc", description)
-      // spew more build details in console
-      .v("verbose", verbose ? "1" : "0")
-      // make this a preview build only, nothing is uploaded
-      .v("preview", preview ? "1" : "0")
-      // root content folder, relative to location of this file
-      .v("ContentRoot", "..\\content\\")
-      // build output folder for build logs and build cache files
-      .v("BuildOutput", "..\\output\\")
-      .o("Depots", ds -> ds
-        .o(String.valueOf(depotId), d -> d
-          .o("FileMapping", f -> f
-            // all files from contentroot folder
-            .v("LocalPath", "*")
-            // mapped into the root of the depot
-            .v("DepotPath", ".")
-            // include all subfolders
-            .v("recursive", "1")
-          )
+        .v("AppId", String.valueOf(appId))
+        .v("Desc", description)
+        // spew more build details in console
+        .v("verbose", verbose ? "1" : "0")
+        // make this a preview build only, nothing is uploaded
+        .v("preview", preview ? "1" : "0")
+        // root content folder, relative to location of this file
+        .v("ContentRoot", "..\\content\\")
+        // build output folder for build logs and build cache files
+        .v("BuildOutput", "..\\output\\")
+        .o("Depots", ds -> ds
+            .o(String.valueOf(depotId), d -> d
+                .o("FileMapping", f -> f
+                    // all files from contentroot folder
+                    .v("LocalPath", "*")
+                    // mapped into the root of the depot
+                    .v("DepotPath", ".")
+                    // include all subfolders
+                    .v("recursive", "1")
+                )
+            )
         )
-      )
-      .toString());
+        .toString());
   }
 }

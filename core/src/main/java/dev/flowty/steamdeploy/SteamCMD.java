@@ -129,7 +129,7 @@ public class SteamCMD {
   private Result build(Auth auth, Path script) {
     auth.vdf().ifPresent(vdf -> {
       Path destination = platform.steamHome(directory).resolve("config", "config.vdf");
-      LOG.info("INJECTING AUTH VDF TO {}", destination);
+      LOG.info("Injecting auth VDF to {}", destination);
       vdf.writeTo(destination);
     });
 

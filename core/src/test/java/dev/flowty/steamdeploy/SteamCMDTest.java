@@ -46,7 +46,7 @@ class SteamCMDTest {
   }
 
   /**
-   * Shows that we can login and immediately quit
+   * Shows that we can log in and immediately quit
    */
   private static void testLogin(String pattern) {
     Path install = Paths.get("target", "SteamCMDTest", "installation");
