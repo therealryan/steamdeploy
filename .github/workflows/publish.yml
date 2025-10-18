@@ -1,4 +1,4 @@
-name: Maven Package
+name: publish
 
 on:
   workflow_dispatch:
