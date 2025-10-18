@@ -43,7 +43,7 @@ enum Platform {
           cmdDir.resolve("linux32", "steamcmd")
               .toAbsolutePath().toString());
       CommandLine.here()
-        .run(steamCmd.toAbsolutePath().toString(), "+quit");
+        .run(cmdDir.resolve(steamCmd).toAbsolutePath().toString(), "+quit");
     }
 
     @Override
