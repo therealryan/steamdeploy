@@ -2,16 +2,41 @@
 
 Build automation for deployment to steamworks
 
- * [core](core): Java API for uploading to steamworks
- * [steamdeploy-maven-plugin](steamdeploy-maven-plugin): Maven plugin for uploading to steamworks
+* [core](core): Java API for uploading to steamworks
+* [steamdeploy-maven-plugin](steamdeploy-maven-plugin): Maven plugin for uploading to steamworks
 
 ## Authentication
 
-## Refreshing your authentication VDF
+There are three routes to logging in to steam on the command line:
 
-At some point the cached credentials will need to be refreshed.
+### Persistent installation
 
-Using an instance of [the SteamCMD executable](https://developer.valvesoftware.com/wiki/SteamCMD), run `steamcmd` and log in, e.g.:
+Steam will cache a successful login to a configuration file, so logging in again from the same
+installation only requires a username.
+
+This is easily achieved if building from a local machine, but is less convenient in the context of
+CI.
+
+### Username and password
+
+The Steamguard 2FA system is mandatory for all users, so logging in with username and password will
+also require either of:
+
+* typing in an emailed token
+* responding to a challenge on the user's steam app
+
+This method might seem attractive if your uploading user is set up for app-based 2FA and you're
+happy to handle the challenges. Bear in mind that Steam will issue additional challenges if it
+detects geographic anomalies in the user's logins, which is likely to happen in CI contexts.
+
+### Username and cached authentication
+
+If we capture the cached authentication from a successful manual login, we can inject it into new
+installations.
+
+To capture the cached login: create an instance
+of [the SteamCMD executable](https://developer.valvesoftware.com/wiki/SteamCMD), run `steamcmd` and
+log in, e.g.:
 
 ```
 $ steamcmd +login <your username> <your password> +quit
@@ -42,9 +67,13 @@ Waiting for user info...OK
 Unloading Steam API...OK
 ```
 
+Depending on the configuration of the user you'll need to enter an emailed code or
+respond to the app-based authentication challenge
+
 </details>
 
 Check that credentials have been cached:
+
 ```
 $ steamcmd +login <your username> +quit
 ```
@@ -70,10 +99,15 @@ Unloading Steam API...OK
 </details>
 
 Capture the config that contains the credentials:
+
 ```
 cat config/config.vdf | base64 > cfgb64.txt
 ```
-Note that the exact location of the `config.vdf` file that contains the authentication details is platform-specific.
-Check out the [`Platform` enum](core/src/main/java/dev/flowty/steamdeploy/Platform.java) in this project for details.
 
-Update the github secret with the contents of `cfgb64.txt`
+Note that the exact location of the `config.vdf` file that contains the authentication details is
+platform-specific.
+Check out the [`Platform` enum](core/src/main/java/dev/flowty/steamdeploy/Platform.java) in this
+project for details.
+
+The contents of `cfgb64.txt` can be stored as a secret on the CI system and passed to the plugin as
+an environment variable. 
