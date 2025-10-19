@@ -7,6 +7,7 @@ Maven plugin for uploading to steamworks.
 ## Usage
 
 ```xml
+
 <project>
   <build>
     <plugins>
@@ -34,16 +35,22 @@ Maven plugin for uploading to steamworks.
 </project>
 ```
 
+The plugin is bound to the `deploy` phase by default, so running `mvn deploy` will provoke the
+plugin to execute
+
 This usage assumes that:
- * The compiled application files are in `target/image`
- * I'm happy with the simple `appBuild` VDF shown in the [core readme](../core/README.md)
- * There's an environment variable named `STEAM_AUTH_VDF` that contains the base64-encoded contents of a logged-in `config.vdf` file
+
+* The compiled application files are in `target/image`
+* I'm happy with the simple `appBuild` VDF shown in the [core readme](../core/README.md)
+* There's an environment variable named `STEAM_AUTH_VDF` that contains the base64-encoded contents
+  of a logged-in `config.vdf` file
 
 See the [main readme](..) for how to generate that content.
 
 ## Parameters
 
 `mvn dev.flowty.steamdeploy:steamdeploy-maven-plugin:x.y.z:help -Ddetail=true`
+
 ```
 steamdeploy-maven-plugin x.y.z
   Build tooling for uploading to steamworks
