@@ -3,8 +3,6 @@ Build plugin for deployment to steamworks
 
 ## todo
 
- * core:
-   * CI testing
  * maven-plugin
  * gradle-plugin
 
@@ -15,7 +13,7 @@ At some point the cached credentials will need to be refreshed.
 Using an instance of [the SteamCMD executable](https://developer.valvesoftware.com/wiki/SteamCMD), run `steamcmd` and log in, e.g.:
 
 ```
-$ steamcmd +login <your username> <your passwor> +quit
+$ steamcmd +login <your username> <your password> +quit
 ```
 
 <details>
