@@ -24,22 +24,28 @@ import org.apache.maven.plugins.annotations.Parameter;
 public class DeployMojo extends AbstractMojo {
 
   /**
+   * Optional: Skips plugin execution
+   */
+  @Parameter(property = "steamdeploy.skip", defaultValue = "false")
+  private boolean skip;
+
+  /**
    * Optional: The URL from which to download the steamCMD executable, if the defaults don't work
    * for you
    */
-  @Parameter(property = "deploy.source")
+  @Parameter(property = "steamdeploy.source")
   private String source;
 
   /**
    * Optional: The directory in which to install the steamCMD executable
    */
-  @Parameter(property = "deploy.install", defaultValue = "target/steamcmd")
+  @Parameter(property = "steamdeploy.install", defaultValue = "target/steamcmd")
   private String install;
 
   /**
    * The steam user name.
    */
-  @Parameter(property = "deploy.user", required = true)
+  @Parameter(property = "steamdeploy.user", required = true)
   private String user;
 
   private String password = System.getenv("STEAM_PASSWORD");
@@ -49,7 +55,7 @@ public class DeployMojo extends AbstractMojo {
   /**
    * The directory that holds the application to deploy
    */
-  @Parameter( property = "deploy.application", required = true)
+  @Parameter(property = "steamdeploy.application", required = true)
   private String application;
 
   /**
@@ -64,47 +70,51 @@ public class DeployMojo extends AbstractMojo {
    * </ul>
    * are forbidden
    */
-  @Parameter(property = "deploy.script")
+  @Parameter(property = "steamdeploy.script")
   private String script;
 
   /**
    * Optional: The steam application ID. <code>depotId</code> is also required.
    */
-  @Parameter(property = "deploy.appId")
+  @Parameter(property = "steamdeploy.appId")
   private Integer appId;
 
   /**
    * Optional: The steam depot ID. <code>appId</code> is also required.
    */
-  @Parameter(property = "deploy.depotId")
+  @Parameter(property = "steamdeploy.depotId")
   private Integer depotId;
 
   /**
-   * Optional: A description for the build.
+   * Optional: A description for the build. Default value will detail the OS name and current time.
    */
-  @Parameter(property = "deploy.description")
+  @Parameter(property = "steamdeploy.description")
   private String description;
 
   /**
    * Optional: Controls verbose logging for the steam deployment
    */
-  @Parameter(property = "deploy.verbose")
+  @Parameter(property = "steamdeploy.verbose")
   private Boolean verbose;
 
   /**
    * Optional: Skips the upload of compiled application content
    */
-  @Parameter(property = "deploy.preview")
+  @Parameter(property = "steamdeploy.preview")
   private Boolean preview;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    if (skip) {
+      getLog().info("Skipping steam deployment");
+      return;
+    }
     Auth auth = buildAuth();
     InjectableFile appBuild = appBuild();
     SteamCMD steamCMD = new SteamCMD(source(), Paths.get(install));
     Result result = steamCMD.deploy(auth, Paths.get(application), appBuild);
     if (result.status() != 0) {
-      throw new MojoFailureException("deployment failed");
+      throw new MojoFailureException("steam deployment failed");
     }
   }
 
@@ -145,7 +155,7 @@ public class DeployMojo extends AbstractMojo {
       return InjectableFile.appBuild(
           appId,
           Optional.ofNullable(description)
-              .orElse( System.getProperty("os.name") + "@" +  Instant.now()),
+              .orElse(System.getProperty("os.name") + "@" + Instant.now()),
           Optional.ofNullable(verbose).orElse(false),
           Optional.ofNullable(preview).orElse(false),
           depotId);
