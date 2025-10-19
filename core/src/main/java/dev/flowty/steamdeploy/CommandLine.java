@@ -20,10 +20,6 @@ class CommandLine {
 
   private static final Logger LOG = LoggerFactory.getLogger(CommandLine.class);
 
-  public record Result(int status, List<String> stdOut) {
-
-  }
-
   private final Path workingDirectory;
   private Duration timeout = Duration.ofHours(1);
   private Duration inactivity = Duration.ofHours(1);

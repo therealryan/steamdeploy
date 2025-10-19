@@ -7,7 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # required for mvn release:perform to push the versioning commits and tag
+                       # note that mvn release:perform must be able to clone the tag, implying
+                       # that the project is public on github
 
     steps:
     - uses: actions/checkout@v4
@@ -17,11 +19,15 @@ jobs:
       with:
         java-version: '22'
         distribution: 'temurin'
-        server-id: central
+        # these three configure maven's settings.xml content
+        server-id: central # matches central-publishing-maven-plugin's <publishingServerId>
         server-username: MAVEN_USERNAME
         server-password: MAVEN_PASSWORD
-        gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
+        # these all-caps values are just naming the environment variables where
+        # the actual values will be found. They get populated below
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
+        # populate secret with result of `gpg --armor --export-secret-key`
+        gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
 
     - name: Configure Git User
       run: |
@@ -31,8 +37,11 @@ jobs:
     - name: Publish package
       run: mvn -B release:prepare release:perform
       env:
+        # from https://central.sonatype.com/usertoken
         MAVEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+        # https://central.sonatype.org/publish/requirements/gpg/
         MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+        # required for commit and tag push
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ github.token }}

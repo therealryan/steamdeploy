@@ -1,6 +1,5 @@
 package dev.flowty.steamdeploy;
 
-import dev.flowty.steamdeploy.CommandLine.Result;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -48,9 +47,18 @@ public class DeployMojo extends AbstractMojo {
   @Parameter(property = "steamdeploy.user", required = true)
   private String user;
 
-  private String password = System.getenv("STEAM_PASSWORD");
+  /**
+   * The name of the environment variable that holds the steam user's password
+   */
+  @Parameter(property = "steamdeploy.passwordVar", defaultValue = "STEAM_PASSWORD")
+  private String passwordVar;
 
-  private String authVDF = System.getenv("STEAM_AUTH_VDF");
+  /**
+   * The name of the environment variable that holds the base64-encoded authorised
+   * <code>config.vdf</code> content
+   */
+  @Parameter(property = "steamdeploy.authVdfVar", defaultValue = "STEAM_AUTH_VDF")
+  private String authVdfVar;
 
   /**
    * The directory that holds the application to deploy
@@ -94,13 +102,13 @@ public class DeployMojo extends AbstractMojo {
   /**
    * Optional: Controls verbose logging for the steam deployment
    */
-  @Parameter(property = "steamdeploy.verbose")
+  @Parameter(property = "steamdeploy.verbose", defaultValue = "false")
   private Boolean verbose;
 
   /**
    * Optional: Skips the upload of compiled application content
    */
-  @Parameter(property = "steamdeploy.preview")
+  @Parameter(property = "steamdeploy.preview", defaultValue = "false")
   private Boolean preview;
 
   @Override
@@ -114,7 +122,7 @@ public class DeployMojo extends AbstractMojo {
     SteamCMD steamCMD = new SteamCMD(source(), Paths.get(install));
     Result result = steamCMD.deploy(auth, Paths.get(application), appBuild);
     if (result.status() != 0) {
-      throw new MojoFailureException("steam deployment failed");
+      throw new MojoFailureException("steam deployment failed!\n" + result.stdOut());
     }
   }
 
@@ -130,6 +138,8 @@ public class DeployMojo extends AbstractMojo {
   }
 
   private Auth buildAuth() throws MojoFailureException {
+    String password = System.getenv(passwordVar);
+    String authVDF = System.getenv(authVdfVar);
     if (authVDF != null && password != null) {
       throw new MojoFailureException("password is extraneous when an auth VDF is supplied");
     }

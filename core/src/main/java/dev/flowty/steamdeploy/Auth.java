@@ -21,8 +21,8 @@ public class Auth {
   }
 
   /**
-   * For when you have the content of a previously-authorised session VDF. This is
-   * definitely the way to go for usage in CI contexts.
+   * For when you have the content of a previously-authorised session VDF. This is definitely the
+   * way to go for usage in CI contexts.
    */
   public Auth(String username, InjectableFile vdf) {
     this.username = username;
@@ -31,24 +31,24 @@ public class Auth {
   }
 
   /**
-   * For when you're confident that the local SDK installation already
-   * contains the VDF that resulted from an earlier authorisation
+   * For when you're confident that the local SDK installation already contains the VDF that
+   * resulted from an earlier authorisation
    */
-  public Auth( String username ){
+  public Auth(String username) {
     this.username = username;
     this.password = Optional.empty();
     this.vdf = Optional.empty();
   }
 
-  public String username() {
+  String username() {
     return username;
   }
 
-  public Optional<String> password() {
+  Optional<String> password() {
     return password;
   }
 
-  public Optional<InjectableFile> vdf() {
+  Optional<InjectableFile> vdf() {
     return vdf;
   }
 }

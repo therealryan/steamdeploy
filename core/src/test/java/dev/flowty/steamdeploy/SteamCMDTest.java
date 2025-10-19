@@ -1,6 +1,5 @@
 package dev.flowty.steamdeploy;
 
-import dev.flowty.steamdeploy.CommandLine.Result;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;

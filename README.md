@@ -1,10 +1,11 @@
 # steamdeploy
-Build plugin for deployment to steamworks
 
-## todo
+Build automation for deployment to steamworks
 
- * maven-plugin
- * gradle-plugin
+ * [core](core): Java API for uploading to steamworks
+ * [steamdeploy-maven-plugin](steamdeploy-maven-plugin): Maven plugin for uploading to steamworks
+
+## Authentication
 
 ## Refreshing your authentication VDF
 

@@ -1,9 +1,5 @@
 package dev.flowty.steamdeploy;
 
-import dev.flowty.steamdeploy.CommandLine.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,6 +8,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles creation of and interactions with an installation of <a
@@ -60,6 +58,12 @@ public class SteamCMD {
     return this;
   }
 
+  /**
+   * Checks auth validity
+   *
+   * @param auth How to authenticate to steam
+   * @return command results
+   */
   public Result loginAndQuit(Auth auth) {
     auth.vdf().ifPresent(vdf -> {
       Path destination = platform.steamHome(directory).resolve("config", "config.vdf");
@@ -72,15 +76,15 @@ public class SteamCMD {
       throw new IllegalStateException(full.toString());
     }
     return CommandLine.here()
-      .failingAfter(timeouts.total())
-      .toleratingInactivityOf(timeouts.inactivity())
-      .run(Stream.of(
-          full.toAbsolutePath().toString(),
-          "+login", auth.username(), auth.password().orElse(null),
-          "+quit")
-        .filter(Objects::nonNull)
-        .toArray(String[]::new)
-      );
+        .failingAfter(timeouts.total())
+        .toleratingInactivityOf(timeouts.inactivity())
+        .run(Stream.of(
+                full.toAbsolutePath().toString(),
+                "+login", auth.username(), auth.password().orElse(null),
+                "+quit")
+            .filter(Objects::nonNull)
+            .toArray(String[]::new)
+        );
   }
 
   /**
@@ -89,6 +93,7 @@ public class SteamCMD {
    * @param auth     How to authenticate to steam
    * @param source   The directory that contains the application files
    * @param appBuild The application build script
+   * @return command results
    */
   public Result deploy(Auth auth, Path source, InjectableFile appBuild) {
     ingestApplication(source);
@@ -139,25 +144,25 @@ public class SteamCMD {
       throw new IllegalStateException(full.toString());
     }
     Result result = CommandLine.here()
-      .failingAfter(timeouts.total())
-      .toleratingInactivityOf(timeouts.inactivity())
-      .run(Stream.of(
-          full.toAbsolutePath().toString(),
-          "+login", auth.username(), auth.password().orElse(null),
-          "+run_app_build",
-          script.toAbsolutePath().toString(),
-          "+quit")
-        .filter(Objects::nonNull)
-        .toArray(String[]::new)
-      );
+        .failingAfter(timeouts.total())
+        .toleratingInactivityOf(timeouts.inactivity())
+        .run(Stream.of(
+                full.toAbsolutePath().toString(),
+                "+login", auth.username(), auth.password().orElse(null),
+                "+run_app_build",
+                script.toAbsolutePath().toString(),
+                "+quit")
+            .filter(Objects::nonNull)
+            .toArray(String[]::new)
+        );
 
     if (result.status() == 0) {
       LOG.error("Build success!\n  {}",
-        String.join("\n  ", result.stdOut()));
+          String.join("\n  ", result.stdOut()));
     } else {
       LOG.error("Build failure! {}\n  {}",
-        result.status(),
-        String.join("\n  ", result.stdOut()));
+          result.status(),
+          String.join("\n  ", result.stdOut()));
       throw new IllegalStateException("build failed with status " + result.status());
     }
     return result;
