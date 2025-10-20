@@ -10,6 +10,7 @@ jobs:
       contents: write  # required for mvn release:perform to push the versioning commits and tag
                        # note that mvn release:perform must be able to clone the tag, implying
                        # that the project is public on github
+                       # (maven-release-plugin's <localCheckout> might work around that)
 
     steps:
     - uses: actions/checkout@v4
