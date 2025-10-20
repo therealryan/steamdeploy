@@ -40,8 +40,12 @@ jobs:
         # from https://central.sonatype.com/usertoken
         MAVEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+        # N.B.: attempts to publish SNAPSHOT artifacts to a namespace that is not confgured to accept them
+        # will provoke 403 responses - https://central.sonatype.org/publish/publish-portal-snapshots/
+        
         # https://central.sonatype.org/publish/requirements/gpg/
         MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+        
         # required for commit and tag push
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ github.token }}
