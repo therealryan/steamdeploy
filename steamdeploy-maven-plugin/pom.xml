@@ -14,7 +14,7 @@
   <description>Build tooling for uploading to steamworks</description>
 
   <properties>
-    <maven-plugin-tools.version>3.15.1</maven-plugin-tools.version>
+    <maven-plugin-tools.version>3.15.2</maven-plugin-tools.version>
   </properties>
 
   <dependencies>
