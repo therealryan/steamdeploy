@@ -4,7 +4,7 @@
   <parent>
     <groupId>dev.flowty.steamdeploy</groupId>
     <artifactId>root</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5-SNAPSHOT</version>
   </parent>
 
   <artifactId>steamdeploy-maven-plugin</artifactId>
