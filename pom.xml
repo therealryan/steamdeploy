@@ -4,7 +4,7 @@
 
   <groupId>dev.flowty.steamdeploy</groupId>
   <artifactId>root</artifactId>
-  <version>0.0.4-SNAPSHOT</version>
+  <version>0.0.4</version>
   <packaging>pom</packaging>
 
   <name>steamdeploy</name>
@@ -34,7 +34,7 @@
   <scm>
     <connection>scm:git:https://github.com/therealryan/steamdeploy.git</connection>
     <developerConnection>scm:git:https://github.com/therealryan/steamdeploy.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>0.0.4</tag>
     <url>https://github.com/therealryan/steamdeploy</url>
   </scm>
 
