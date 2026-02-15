@@ -10,12 +10,13 @@ jobs:
       contents: write  # required for mvn release:perform to push the versioning commits and tag
                        # note that mvn release:perform must be able to clone the tag, implying
                        # that the project is public on github
+                       # (maven-release-plugin's <localCheckout> might work around that)
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up JDK 22
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: '22'
         distribution: 'temurin'
@@ -40,8 +41,12 @@ jobs:
         # from https://central.sonatype.com/usertoken
         MAVEN_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
+        # N.B.: attempts to publish SNAPSHOT artifacts to a namespace that is not confgured to accept them
+        # will provoke 403 responses - https://central.sonatype.org/publish/publish-portal-snapshots/
+        
         # https://central.sonatype.org/publish/requirements/gpg/
         MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+        
         # required for commit and tag push
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ github.token }}
