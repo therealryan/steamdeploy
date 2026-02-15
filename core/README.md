@@ -1,6 +1,6 @@
 # core
 
-![Maven Central Version](https://img.shields.io/maven-central/v/dev.flowty.steamdeploy/core)
+[![Maven Central Version](https://img.shields.io/maven-central/v/dev.flowty.steamdeploy/core)](https://central.sonatype.com/artifact/dev.flowty.steamdeploy/core)
 [![javadoc](https://javadoc.io/badge2/dev.flowty.steamdeploy/core/javadoc.svg)](https://javadoc.io/doc/dev.flowty.steamdeploy/core)
 
 Java API for uploading to steamworks.

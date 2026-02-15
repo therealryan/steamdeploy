@@ -1,6 +1,6 @@
 # steamdeploy-maven-plugin
 
-![Maven Central Version](https://img.shields.io/maven-central/v/dev.flowty.steamdeploy/steamdeploy-maven-plugin)
+[![Maven Central Version](https://img.shields.io/maven-central/v/dev.flowty.steamdeploy/steamdeploy-maven-plugin)](https://central.sonatype.com/artifact/dev.flowty.steamdeploy/steamdeploy-maven-plugin)
 
 Maven plugin for uploading to steamworks.
 
